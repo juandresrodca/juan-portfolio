@@ -3,48 +3,47 @@ name: Deploy Astro Project to GitHub Pages
 on:
   push:
     branches:
-      - main # This workflow runs when you push to the 'main' branch
+      - main # Este flujo de trabajo se ejecuta cuando haces push a la rama 'main'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    # Establece el directorio de trabajo para todos los pasos en este job
+    # para asegurar que npm y Astro se ejecuten desde la raíz del repositorio
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }} # <-- Asegura que los comandos se ejecutan desde la raíz del repo
 
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Fetch all history for gh-pages
+          fetch-depth: 0 # Recupera todo el historial para gh-pages
 
       - name: Setup Node.js environment 🔧
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Use Node.js 20 or a compatible version
-
-      - name: Setup Node.js environment 🔧
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20' # Make sure this matches your local Node.js version, or is a compatible LTS version
+          node-version: '20' # Usa Node.js 20 o una versión LTS compatible
 
       - name: Cache Node Modules ⚡️
-        uses: actions/cache@v4 # Use actions/cache to cache node_modules
+        uses: actions/cache@v4
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }} # Cache key based on OS and package-lock.json
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
       - name: Install dependencies 📦
-        run: npm ci # Use 'npm ci' for clean installs in CI/CD environments
-        # If 'npm ci' gives errors, fall back to 'npm install' but 'npm ci' is preferred for CI
-        # run: npm install
+        run: npm ci # Usa 'npm ci' para instalaciones limpias en entornos CI/CD
+        # Si 'npm ci' da errores, puedes volver a 'npm install'
 
       - name: Build Astro project 🏗️
-        run: npm run build # Or yarn build
+        run: npm run build # O yarn build
 
       - name: Deploy to GitHub Pages 🚀
-        uses: peaceiris/actions-gh-pages@v4 # Recommended action for gh-pages deployment
+        uses: peaceiris/actions-gh-pages@v4 # Acción recomendada para el despliegue en gh-pages
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist # Specify the directory to publish
-          publish_branch: gh-pages # Specify the branch to publish to
-          force_orphan: true # Recommended for clean deployment (replaces gh-pages branch content)
+          publish_dir: ./dist # Especifica el directorio a publicar
+          publish_branch: gh-pages # Especifica la rama a la que publicar
+          force_orphan: true # Recomendado para un despliegue limpio (reemplaza el contenido de la rama gh-pages)
