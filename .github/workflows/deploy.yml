@@ -20,8 +20,23 @@ jobs:
         with:
           node-version: '20' # Use Node.js 20 or a compatible version
 
+      - name: Setup Node.js environment 🔧
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Make sure this matches your local Node.js version, or is a compatible LTS version
+
+      - name: Cache Node Modules ⚡️
+        uses: actions/cache@v4 # Use actions/cache to cache node_modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }} # Cache key based on OS and package-lock.json
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install dependencies 📦
-        run: npm install # Or yarn install
+        run: npm ci # Use 'npm ci' for clean installs in CI/CD environments
+        # If 'npm ci' gives errors, fall back to 'npm install' but 'npm ci' is preferred for CI
+        # run: npm install
 
       - name: Build Astro project 🏗️
         run: npm run build # Or yarn build
